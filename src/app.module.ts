@@ -1,8 +1,8 @@
 import { Module } from "@nestjs/common";
 import { GraphQLModule } from "@nestjs/graphql";
 import { ApolloDriver, ApolloDriverConfig } from "@nestjs/apollo";
-import { AppService } from "./app.service";
-import { AppResolver } from "./app.resolver";
+import { EdgeModule } from "./edge/edge.module";
+import { PrismaModule } from "./prisma.module";
 
 @Module({
   imports: [
@@ -11,7 +11,8 @@ import { AppResolver } from "./app.resolver";
       autoSchemaFile: "schema.gql",
       graphiql: true,
     }),
+    PrismaModule,
+    EdgeModule,
   ],
-  providers: [AppService, AppResolver],
 })
 export class AppModule {}

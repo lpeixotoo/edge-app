@@ -2,6 +2,21 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+type EdgeObject {
+  id: ID!
+  capacity: String!
+  created_at: String!
+  updated_at: String!
+  node1_alias: String!
+  node2_alias: String!
+  edge_peers: String!
+}
+
 type Query {
-  hello: String!
+  getEdges: [EdgeObject!]!
+  getEdge(id: String!): EdgeObject
+}
+
+type Mutation {
+  createEdge(node1_alias: String!, node2_alias: String!): EdgeObject!
 }
