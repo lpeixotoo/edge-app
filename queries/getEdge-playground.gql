@@ -1,0 +1,311 @@
+# GraphQL Query Playground for getEdge
+
+# =============================================================================
+# BASIC GET EDGE QUERY
+# =============================================================================
+
+# Query to get a specific edge by ID
+query GetEdgeById {
+  getEdge(id: "1") {
+    id
+    capacity
+    created_at
+    updated_at
+    node1_alias
+    node2_alias
+    edge_peers
+  }
+}
+
+# =============================================================================
+# MINIMAL FIELDS QUERY
+# =============================================================================
+
+# Query with only essential fields
+query GetEdgeMinimal {
+  getEdge(id: "1") {
+    id
+    node1_alias
+    node2_alias
+    edge_peers
+  }
+}
+
+# =============================================================================
+# CAPACITY FOCUSED QUERY
+# =============================================================================
+
+# Query focused on capacity and node information
+query GetEdgeCapacity {
+  getEdge(id: "1") {
+    id
+    capacity
+    node1_alias
+    node2_alias
+    edge_peers
+  }
+}
+
+# =============================================================================
+# TIMESTAMP FOCUSED QUERY
+# =============================================================================
+
+# Query focused on timestamps and metadata
+query GetEdgeTimestamps {
+  getEdge(id: "1") {
+    id
+    created_at
+    updated_at
+    edge_peers
+  }
+}
+
+# =============================================================================
+# VARIABLES EXAMPLES
+# =============================================================================
+
+# Using variables for edge ID
+query GetEdgeWithVariable($edgeId: String!) {
+  getEdge(id: $edgeId) {
+    id
+    capacity
+    created_at
+    updated_at
+    node1_alias
+    node2_alias
+    edge_peers
+  }
+}
+
+# Variables for the above query:
+# {
+#   "edgeId": "your-edge-id-here"
+# }
+
+# =============================================================================
+# ALIAS USAGE EXAMPLES
+# =============================================================================
+
+# Using aliases for cleaner field names
+query GetEdgeWithAliases {
+  getEdge(id: "1") {
+    edgeId: id
+    channelCapacity: capacity
+    createdDate: created_at
+    lastUpdated: updated_at
+    firstNode: node1_alias
+    secondNode: node2_alias
+    nodePair: edge_peers
+  }
+}
+
+# =============================================================================
+# MULTIPLE EDGE QUERIES
+# =============================================================================
+
+# Query multiple edges using aliases
+query GetMultipleEdges {
+  firstEdge: getEdge(id: "1") {
+    id
+    capacity
+    node1_alias
+    node2_alias
+    edge_peers
+  }
+
+  secondEdge: getEdge(id: "2") {
+    id
+    capacity
+    node1_alias
+    node2_alias
+    edge_peers
+  }
+}
+
+# =============================================================================
+# CONDITIONAL QUERIES WITH FRAGMENTS
+# =============================================================================
+
+# Define a fragment for edge details
+fragment EdgeDetails on EdgeObject {
+  id
+  capacity
+  created_at
+  updated_at
+  node1_alias
+  node2_alias
+  edge_peers
+}
+
+# Use the fragment in queries
+query GetEdgeWithFragment {
+  getEdge(id: "1") {
+    ...EdgeDetails
+  }
+}
+
+# =============================================================================
+# ERROR HANDLING EXAMPLES
+# =============================================================================
+
+# Query that might return null (non-existent edge)
+query GetNonExistentEdge {
+  getEdge(id: "non-existent-id") {
+    id
+    capacity
+    node1_alias
+    node2_alias
+    edge_peers
+  }
+}
+
+# =============================================================================
+# TESTING DIFFERENT ID FORMATS
+# =============================================================================
+
+# Test with UUID-like ID
+query GetEdgeUUID {
+  getEdge(id: "550e8400-e29b-41d4-a716-446655440000") {
+    id
+    capacity
+    node1_alias
+    node2_alias
+    edge_peers
+  }
+}
+
+# Test with numeric string ID
+query GetEdgeNumeric {
+  getEdge(id: "12345") {
+    id
+    capacity
+    node1_alias
+    node2_alias
+    edge_peers
+  }
+}
+
+# Test with short ID
+query GetEdgeShort {
+  getEdge(id: "abc") {
+    id
+    capacity
+    node1_alias
+    node2_alias
+    edge_peers
+  }
+}
+
+# =============================================================================
+# COMBINED QUERY WITH ALL OPERATIONS
+# =============================================================================
+
+# Get edge alongside other operations
+query GetEdgeAndList {
+  # Get specific edge
+  specificEdge: getEdge(id: "1") {
+    id
+    capacity
+    node1_alias
+    node2_alias
+    edge_peers
+    created_at
+    updated_at
+  }
+
+  # Get all edges for comparison
+  allEdges: getEdges {
+    id
+    node1_alias
+    node2_alias
+    edge_peers
+  }
+}
+
+# =============================================================================
+# PERFORMANCE TESTING QUERIES
+# =============================================================================
+
+# Minimal query for performance testing
+query GetEdgePerformance {
+  getEdge(id: "1") {
+    id
+  }
+}
+
+# Full query for comprehensive testing
+query GetEdgeFull {
+  getEdge(id: "1") {
+    id
+    capacity
+    created_at
+    updated_at
+    node1_alias
+    node2_alias
+    edge_peers
+  }
+}
+
+# =============================================================================
+# SAMPLE VARIABLES FOR TESTING
+# =============================================================================
+
+# Example variables you can use with the variable-based queries:
+#
+# For GetEdgeWithVariable:
+# {
+#   "edgeId": "1"
+# }
+#
+# {
+#   "edgeId": "550e8400-e29b-41d4-a716-446655440000"
+# }
+#
+# {
+#   "edgeId": "non-existent-id"
+# }
+
+# =============================================================================
+# EXPECTED RESPONSE FORMATS
+# =============================================================================
+
+# Successful response example:
+# {
+#   "data": {
+#     "getEdge": {
+#       "id": "1",
+#       "capacity": "1000000",
+#       "created_at": "2024-01-01T00:00:00.000Z",
+#       "updated_at": "2024-01-01T00:00:00.000Z",
+#       "node1_alias": "alice",
+#       "node2_alias": "bob",
+#       "edge_peers": "alice-bob"
+#     }
+#   }
+# }
+
+# Null response example (edge not found):
+# {
+#   "data": {
+#     "getEdge": null
+#   }
+# }
+
+# Error response example:
+# {
+#   "errors": [
+#     {
+#       "message": "Database error",
+#       "locations": [
+#         {
+#           "line": 2,
+#           "column": 3
+#         }
+#       ],
+#       "path": ["getEdge"]
+#     }
+#   ],
+#   "data": {
+#     "getEdge": null
+#   }
+# }

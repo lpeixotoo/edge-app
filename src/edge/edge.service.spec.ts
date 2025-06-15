@@ -174,4 +174,101 @@ describe("EdgeService", () => {
       expect(prismaService.edge.findUnique).toHaveBeenCalledTimes(1);
     });
   });
+
+  describe("updateNodeAliases", () => {
+    const edgeId = "1";
+    const updatedEdge = {
+      ...mockEdge,
+      node1Alias: "alice_updated",
+      node2Alias: "bob_updated",
+    };
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it("should update node aliases by appending '_updated'", async () => {
+      mockPrismaService.edge.findUnique.mockResolvedValue(mockEdge);
+      mockPrismaService.edge.update.mockResolvedValue(updatedEdge);
+
+      const result = await service.updateNodeAliases(edgeId);
+
+      expect(result).toEqual(updatedEdge);
+      expect(prismaService.edge.findUnique).toHaveBeenCalledTimes(1);
+      expect(prismaService.edge.findUnique).toHaveBeenCalledWith({
+        where: { id: edgeId },
+      });
+      expect(prismaService.edge.update).toHaveBeenCalledTimes(1);
+      expect(prismaService.edge.update).toHaveBeenCalledWith({
+        where: { id: edgeId },
+        data: {
+          node1Alias: "alice_updated",
+          node2Alias: "bob_updated",
+        },
+      });
+    });
+
+    it("should return null when edge not found", async () => {
+      mockPrismaService.edge.findUnique.mockResolvedValue(null);
+
+      const result = await service.updateNodeAliases("non-existent-id");
+
+      expect(result).toBeNull();
+      expect(prismaService.edge.findUnique).toHaveBeenCalledTimes(1);
+      expect(prismaService.edge.findUnique).toHaveBeenCalledWith({
+        where: { id: "non-existent-id" },
+      });
+      expect(prismaService.edge.update).not.toHaveBeenCalled();
+    });
+
+    it("should handle edges with already updated aliases", async () => {
+      const alreadyUpdatedEdge = {
+        ...mockEdge,
+        node1Alias: "alice_updated",
+        node2Alias: "bob_updated",
+      };
+      const doubleUpdatedEdge = {
+        ...mockEdge,
+        node1Alias: "alice_updated_updated",
+        node2Alias: "bob_updated_updated",
+      };
+
+      mockPrismaService.edge.findUnique.mockResolvedValue(alreadyUpdatedEdge);
+      mockPrismaService.edge.update.mockResolvedValue(doubleUpdatedEdge);
+
+      const result = await service.updateNodeAliases(edgeId);
+
+      expect(result).toEqual(doubleUpdatedEdge);
+      expect(prismaService.edge.update).toHaveBeenCalledWith({
+        where: { id: edgeId },
+        data: {
+          node1Alias: "alice_updated_updated",
+          node2Alias: "bob_updated_updated",
+        },
+      });
+    });
+
+    it("should handle database errors during findUnique", async () => {
+      const dbError = new Error("Database error");
+      mockPrismaService.edge.findUnique.mockRejectedValue(dbError);
+
+      await expect(service.updateNodeAliases(edgeId)).rejects.toThrow(
+        "Database error",
+      );
+      expect(prismaService.edge.findUnique).toHaveBeenCalledTimes(1);
+      expect(prismaService.edge.update).not.toHaveBeenCalled();
+    });
+
+    it("should handle database errors during update", async () => {
+      const dbError = new Error("Update failed");
+      mockPrismaService.edge.findUnique.mockResolvedValue(mockEdge);
+      mockPrismaService.edge.update.mockRejectedValue(dbError);
+
+      await expect(service.updateNodeAliases(edgeId)).rejects.toThrow(
+        "Update failed",
+      );
+      expect(prismaService.edge.findUnique).toHaveBeenCalledTimes(1);
+      expect(prismaService.edge.update).toHaveBeenCalledTimes(1);
+    });
+  });
 });

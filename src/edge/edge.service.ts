@@ -3,6 +3,7 @@ import { Prisma } from "@prisma/client";
 import { PrismaService } from "../prisma.service";
 import { ClientProxy } from "@nestjs/microservices";
 import { EDGE_EVENTS_SERVICE } from "../rabbitmq/rabbitmq.options";
+import { EdgeCreatedPayload } from "src/rabbitmq/rabbitmq.protocols";
 
 @Injectable()
 export class EdgeService {
@@ -24,7 +25,7 @@ export class EdgeService {
     const edge = await this.prisma.edge.create({ data }); // fire-and-forget; we log but don’t await for perf
 
     this.mq
-      .emit("edge.created", {
+      .emit<string, EdgeCreatedPayload>("edge.created", {
         id: edge.id,
         node1Alias: edge.node1Alias,
         node2Alias: edge.node2Alias,
@@ -42,5 +43,25 @@ export class EdgeService {
    */
   findOne(id: string) {
     return this.prisma.edge.findUnique({ where: { id } });
+  }
+
+  /**
+   * Update node aliases by appending "_updated" to both aliases
+   * @param {string} id - Edge id
+   */
+  async updateNodeAliases(id: string) {
+    const edge = await this.prisma.edge.findUnique({ where: { id } });
+
+    if (!edge) {
+      return null;
+    }
+
+    return this.prisma.edge.update({
+      where: { id },
+      data: {
+        node1Alias: `${edge.node1Alias}_updated`,
+        node2Alias: `${edge.node2Alias}_updated`,
+      },
+    });
   }
 }
